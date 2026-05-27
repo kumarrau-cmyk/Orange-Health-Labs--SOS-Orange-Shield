@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>OHL Kavach</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --o:#FF5722;--o2:#E64A19;--od:#BF360C;--ol:#FFF3EF;--om:#FFCCBC;
+  --r:#C62828;--rl:#FFEBEE;--rm:#EF9A9A;
+  --g:#2E7D32;--gl:#E8F5E9;
+  --b:#1565C0;--bl:#E3F2FD;
+  --a:#E65100;--al:#FFF8E1;
+  --p:#4527A0;--pl:#EDE7F6;
+  --k:#212121;--k2:#424242;--k3:#757575;--k4:#BDBDBD;
+  --bg:#FFF8F6;--card:#FFF;--bd:rgba(0,0,0,0.09);--bd2:rgba(0,0,0,0.16);
+  --sh:0 1px 4px rgba(0,0,0,0.07),0 2px 10px rgba(0,0,0,0.05);
+  --f:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:var(--f);color:var(--k);background:var(--bg);}
+body{max-width:420px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+input,select,button{font-family:var(--f);}
+a{text-decoration:none;color:inherit;}
+button{cursor:pointer;}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;height:100vh;overflow:hidden;}
+.screen.active{display:flex;}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 28px;}
+
+/* ─── BOTTOM NAV ─── */
+.nav{background:var(--card);border-top:1.5px solid var(--bd);display:grid;grid-template-columns:repeat(5,1fr);flex-shrink:0;}
+.ni{padding:8px 0 6px;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;}
+.ni svg{width:20px;height:20px;fill:none;stroke:var(--k4);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.ni span{font-size:9px;font-weight:600;color:var(--k4);}
+.ni.on svg{stroke:var(--o);}
+.ni.on span{color:var(--o);}
+
+/* ─── FORMS ─── */
+.fl{font-size:11px;font-weight:700;color:var(--k2);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:5px;}
+.fi{width:100%;border:1.5px solid var(--bd2);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--k);background:var(--card);outline:none;transition:border-color .15s;}
+.fi:focus{border-color:var(--o);}
+.fi.ro{background:var(--bg);color:var(--k3);}
+.fr{display:flex;gap:8px;}
+.fp{border:1.5px solid var(--bd2);border-radius:10px;padding:11px 10px;font-size:13px;background:var(--bg);color:var(--k3);white-space:nowrap;}
+.fs{width:100%;border:1.5px solid var(--bd2);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--k);background:var(--card);outline:none;}
+.fg{margin-bottom:11px;}
+
+/* ─── BUTTONS ─── */
+.btn{width:100%;padding:13px;border:none;border-radius:11px;font-size:14px;font-weight:700;transition:transform .1s,opacity .1s;}
+.btn:active{transform:scale(.98);opacity:.9;}
+.btn-o{background:var(--o);color:#fff;}
+.btn-g{background:var(--g);color:#fff;}
+.btn-gh{background:var(--bg);color:var(--k2);border:1.5px solid var(--bd2);}
+.br{display:flex;gap:8px;}
+.bx{padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;border:none;cursor:pointer;display:inline-block;text-align:center;white-space:nowrap;}
+.bx-c{background:var(--b);color:#fff;}
+.bx-w{background:#25D366;color:#fff;}
+.bx-d{background:var(--bg);color:var(--r);border:1px solid var(--rm);}
+.pl{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;display:inline-block;}
+.pl-o{background:var(--ol);color:var(--o2);}
+.pl-g{background:var(--gl);color:var(--g);}
+.pl-r{background:var(--rl);color:var(--r);}
+.pl-b{background:var(--bl);color:var(--b);}
+.pl-a{background:var(--al);color:var(--a);}
+.cd{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;box-shadow:var(--sh);}
+.sclbl{font-size:10px;font-weight:700;color:var(--k3);text-transform:uppercase;letter-spacing:0.7px;margin:14px 0 8px;}
+.sclbl:first-child{margin-top:0;}
+
+/* ══════════════════════════════════
+   SETUP SCREEN
+   Fits entirely in one viewport — no scroll needed
+══════════════════════════════════ */
+#sc-setup{
+  background:var(--o);
+  overflow:hidden;
+}
+.su-wrap{
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  overflow:hidden;
+}
+/* Top brand strip */
+.su-top{
+  background:var(--od);
+  padding:14px 18px 12px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  flex-shrink:0;
+}
+.su-logo-ic{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(255,255,255,0.25);
+  border:1.5px solid rgba(255,255,255,0.4);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.su-logo-ic svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.su-brand-t{font-size:16px;font-weight:800;color:#fff;}
+.su-brand-s{font-size:10px;color:rgba(255,255,255,0.65);letter-spacing:0.4px;font-weight:500;}
+.su-kavach{background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:3px 11px;font-size:10px;font-weight:700;color:#fff;margin-left:auto;}
+/* Hero strip */
+.su-hero{
+  background:var(--o);
+  padding:14px 18px 12px;
+  flex-shrink:0;
+}
+.su-hero h1{font-size:22px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:4px;}
+.su-hero p{font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;}
+/* Form area */
+.su-form{
+  background:var(--card);
+  border-radius:20px 20px 0 0;
+  flex:1;
+  overflow-y:auto;
+  padding:18px 16px 20px;
+  -webkit-overflow-scrolling:touch;
+}
+.su-field-lbl{font-size:10px;font-weight:700;color:var(--k3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px;display:block;}
+.su-input{width:100%;border:1.5px solid var(--bd2);border-radius:10px;padding:11px 13px;font-size:14px;color:var(--k);background:var(--bg);outline:none;transition:border-color .15s;}
+.su-input:focus{border-color:var(--o);}
+.su-input::placeholder{color:var(--k4);}
+.su-row{display:flex;gap:8px;}
+.su-pre{border:1.5px solid var(--bd2);border-radius:10px;padding:11px 10px;font-size:13px;background:var(--bg);color:var(--k3);white-space:nowrap;}
+.su-note{background:var(--ol);border:1px solid var(--om);border-radius:10px;padding:10px 13px;font-size:11px;color:var(--a);line-height:1.55;margin-bottom:12px;}
+.su-note strong{font-weight:700;color:var(--o2);}
+.su-btn{width:100%;padding:14px;background:var(--o);color:#fff;border:none;border-radius:11px;font-size:15px;font-weight:800;letter-spacing:0.2px;}
+.su-btn:active{background:var(--od);transform:scale(.98);}
+
+/* ══════════════════════════════════
+   HOME — OHL ORANGE HEADER
+══════════════════════════════════ */
+.hdr{background:linear-gradient(135deg,var(--o) 0%,var(--od) 100%);padding:12px 14px;flex-shrink:0;}
+.hdr-top{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+.hdr-logo-ic{width:26px;height:26px;background:rgba(255,255,255,0.2);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hdr-logo-ic svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.hdr-logo-nm{font-size:12px;font-weight:800;color:#fff;}
+.hdr-badge{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;gap:5px;margin-left:auto;}
+.ldot{width:6px;height:6px;border-radius:50%;background:#A5F3A0;animation:bl 2s infinite;}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.25}}
+.hdr-user{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+.hdr-av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;border:2px solid rgba(255,255,255,0.4);}
+.hdr-nm{font-size:14px;font-weight:700;color:#fff;}
+.hdr-sub{font-size:11px;color:rgba(255,255,255,0.7);}
+.gps-box{background:rgba(0,0,0,0.18);border-radius:9px;padding:9px 11px;display:flex;align-items:center;gap:8px;}
+.gps-ic{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.gps-ic svg{width:12px;height:12px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.gps-txt{flex:1;min-width:0;}
+.gps-main{font-size:11px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gps-sub{font-size:10px;color:rgba(255,255,255,0.6);}
+.gps-btn{background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.35);border-radius:8px;padding:5px 11px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;}
+
+/* GPS HELP */
+.gps-help{display:none;background:#FFF8E1;border:1px solid #FFD54F;border-radius:10px;padding:11px 13px;margin-bottom:10px;font-size:12px;color:#5D4000;line-height:1.6;}
+.gps-help.show{display:block;}
+.gps-help strong{font-weight:700;}
+.gps-help ul{margin:6px 0 0 16px;}
+.gps-help ul li{padding:2px 0;font-size:11px;}
+
+/* CHECK-IN */
+.ci{background:var(--al);border:1px solid rgba(230,81,0,0.25);border-radius:10px;padding:9px 12px;margin-bottom:10px;display:flex;align-items:center;gap:9px;}
+.ci-t{flex:1;font-size:12px;color:#5D2600;line-height:1.35;}
+.ci-b{background:var(--a);color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;white-space:nowrap;}
+
+/* ─── SOS BUTTON ─── */
+.sos-sec{display:flex;flex-direction:column;align-items:center;padding:12px 0 8px;}
+.sos-wrap{position:relative;margin-bottom:12px;}
+.sos-r1{position:absolute;inset:-9px;border-radius:50%;border:2px solid rgba(198,40,40,0.28);animation:rp 2.3s ease-in-out infinite;}
+.sos-r2{position:absolute;inset:-18px;border-radius:50%;border:1.5px solid rgba(198,40,40,0.1);animation:rp 2.3s ease-in-out infinite .5s;}
+@keyframes rp{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:.2}}
+.sos-btn{width:130px;height:130px;border-radius:50%;background:linear-gradient(145deg,#E53935,#8B0000);border:5px solid rgba(255,100,90,.4);color:#fff;font-size:28px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;z-index:1;box-shadow:0 6px 24px rgba(198,40,40,.45);}
+.sos-sub{font-size:10px;font-weight:500;opacity:.82;}
+.sos-btn:active{transform:scale(.92);}
+.sos-ht{font-size:12px;color:var(--k3);text-align:center;margin-bottom:9px;}
+.sil-btn{width:100%;background:var(--card);border:1px solid var(--bd);border-radius:13px;padding:11px 13px;display:flex;align-items:center;gap:11px;box-shadow:var(--sh);}
+.sil-ic{width:32px;height:32px;border-radius:9px;background:var(--pl);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sil-ic svg{width:14px;height:14px;fill:none;stroke:var(--p);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.chv svg{width:14px;height:14px;fill:none;stroke:var(--k4);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ESC MATRIX */
+.em-step{display:flex;gap:10px;margin-bottom:7px;align-items:flex-start;}
+.em-n{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--k3);flex-shrink:0;background:var(--bg);}
+.em-n.hi{background:var(--ol);border-color:var(--om);color:var(--o);}
+.em-l{font-size:13px;font-weight:600;color:var(--k);}
+.em-s{font-size:11px;color:var(--k3);}
+.em-ln{width:1px;height:8px;background:var(--bd2);margin-left:10px;margin-bottom:7px;}
+
+/* SOS ACTIVE */
+.sa-hdr{background:linear-gradient(135deg,#C62828 0%,#600000 100%);padding:20px 14px 16px;text-align:center;flex-shrink:0;}
+.sa-pls{width:68px;height:68px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;animation:rp 1.1s ease-in-out infinite;}
+.sa-pls svg{width:30px;height:30px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.sa-hdr h2{font-size:19px;font-weight:800;color:#fff;margin-bottom:4px;}
+.sa-hdr p{font-size:12px;color:rgba(255,255,255,.75);line-height:1.5;}
+.loc-ok{background:var(--gl);border:1px solid rgba(46,125,50,.2);border-radius:10px;padding:10px 12px;margin-bottom:10px;display:flex;gap:9px;align-items:flex-start;font-size:12px;color:#1B4220;line-height:1.5;}
+.loc-ok svg{width:14px;height:14px;fill:none;stroke:var(--g);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px;}
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.at{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:11px 9px;display:flex;flex-direction:column;align-items:center;gap:5px;box-shadow:var(--sh);}
+.at:active{opacity:.8;}
+.at-ic{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.at-ic svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.at-ic.r{background:var(--r);}
+.at-ic.b{background:var(--b);}
+.at-ic.w{background:#25D366;}
+.at-ic.o{background:var(--o);}
+.at-l{font-size:11px;font-weight:700;color:var(--k);text-align:center;}
+.at-s{font-size:10px;color:var(--k3);text-align:center;}
+
+/* TIMELINE */
+.tli{display:flex;gap:9px;margin-bottom:9px;}
+.tll{display:flex;flex-direction:column;align-items:center;}
+.tld{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.tld svg{width:11px;height:11px;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.tld.dn{background:var(--gl);} .tld.dn svg{stroke:var(--g);}
+.tld.ac{background:var(--ol);animation:rp 1.4s infinite;} .tld.ac svg{stroke:var(--o);stroke-width:2;}
+.tld.pd{background:var(--bg);} .tld.pd svg{stroke:var(--k4);stroke-width:1.8;}
+.tll-ln{width:1px;flex:1;min-height:7px;background:var(--bd2);margin:2px 0;}
+.tlc{flex:1;padding-bottom:2px;}
+.tlt{font-size:12px;font-weight:700;color:var(--k);margin-bottom:1px;}
+.tls{font-size:11px;color:var(--k3);}
+.tlts{font-size:10px;color:var(--k4);margin-top:2px;}
+
+/* SILENT */
+.sl-hdr{background:linear-gradient(135deg,#311B92 0%,#1A0070 100%);padding:20px 14px 16px;text-align:center;flex-shrink:0;}
+.sl-hdr-ic{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
+.sl-hdr-ic svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.sl-hdr h2{font-size:18px;font-weight:800;color:#fff;margin-bottom:4px;}
+.sl-hdr p{font-size:12px;color:rgba(255,255,255,.65);line-height:1.5;}
+.ib2{background:var(--card);border:1px solid var(--bd);border-radius:13px;padding:12px 13px;margin-bottom:9px;font-size:13px;color:var(--k2);line-height:1.65;box-shadow:var(--sh);}
+.ib2 strong{font-weight:700;color:var(--k);}
+
+/* MEDICS */
+.mc{background:var(--card);border:1px solid var(--bd);border-radius:13px;padding:12px;margin-bottom:8px;box-shadow:var(--sh);}
+.mc-top{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.mc-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;}
+
+/* AUTHORITIES */
+.ac{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:9px;box-shadow:var(--sh);}
+.ac-em{font-size:20px;width:32px;text-align:center;flex-shrink:0;}
+.ac-acts{display:flex;gap:5px;flex-shrink:0;margin-left:auto;}
+.acb{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;}
+.acb svg{width:13px;height:13px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.acb.c{background:var(--b);}
+.acb.w{background:#25D366;}
+.acb.d{background:var(--bg);border:1px solid var(--bd2);}
+.acb.d svg{stroke:var(--r);}
+
+/* TOPBAR (other screens) */
+.tb{background:var(--o);padding:0;flex-shrink:0;}
+.tb-inner{display:flex;align-items:center;gap:10px;padding:11px 14px;}
+.tb-ic{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.tb-ic svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.tb-name{font-size:14px;font-weight:800;color:#fff;flex:1;}
+.tb-sub{font-size:11px;color:rgba(255,255,255,0.72);}
+.ib{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ib svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ADMIN */
+.adm-hdr{background:linear-gradient(135deg,var(--o) 0%,var(--od) 100%);padding:0;flex-shrink:0;}
+.adm-inner{display:flex;align-items:center;gap:10px;padding:11px 14px;}
+.adm-badge{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.35);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;color:#fff;}
+.ec{background:var(--card);border:1px solid var(--bd);border-radius:13px;overflow:hidden;margin-bottom:10px;box-shadow:var(--sh);}
+.ec-hd{padding:11px 13px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:9px;}
+.ec-n{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;}
+.ec-t{font-size:13px;font-weight:700;color:var(--k);flex:1;}
+.ec-sv{font-size:11px;color:var(--g);font-weight:700;display:none;}
+.ec-bd{padding:12px 13px;}
+.ec-fl{margin-bottom:9px;}
+.ec-fl:last-child{margin-bottom:0;}
+.ec-lbl{font-size:10px;font-weight:700;color:var(--k3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.st{background:var(--card);border:1px solid var(--bd);border-radius:13px;overflow:hidden;margin-bottom:12px;box-shadow:var(--sh);}
+.st-row{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid var(--bd);}
+.st-row:last-child{border-bottom:none;}
+.st-n{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;margin-right:10px;}
+.st-nm{font-size:12px;font-weight:700;color:var(--k);}
+.st-ph{font-size:11px;color:var(--k3);}
+.st-st{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:auto;}
+.ok{background:var(--gl);color:var(--g);}
+.no{background:var(--rl);color:var(--r);}
+
+/* MODAL */
+.mb{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:600;opacity:0;pointer-events:none;transition:opacity .2s;max-width:420px;margin:0 auto;}
+.mb.open{opacity:1;pointer-events:all;}
+.md{background:var(--card);border-radius:20px 20px 0 0;padding:15px 15px 30px;width:100%;max-height:88vh;overflow-y:auto;transform:translateY(12px);transition:transform .2s;}
+.mb.open .md{transform:translateY(0);}
+.mh{width:34px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 14px;}
+.mhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;}
+.mt{font-size:16px;font-weight:800;color:var(--k);}
+.mx{width:28px;height:28px;background:var(--bg);border:1px solid var(--bd);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--k3);cursor:pointer;}
+
+/* TOAST */
+.toast{position:fixed;bottom:75px;left:50%;transform:translateX(-50%) translateY(6px);background:var(--k);color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:22px;opacity:0;transition:opacity .25s,transform .25s;z-index:999;pointer-events:none;white-space:nowrap;max-width:88%;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* SHARED OHL ICON (inline SVG cross) */
+.ohl-ic svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+</style>
+</head>
+<body>
+
+<!-- ═══ SETUP — fits one screen, no scroll ═══ -->
+<div class="screen active" id="sc-setup">
+<div class="su-wrap">
+  <!-- Brand strip -->
+  <div class="su-top">
+    <div class="su-logo-ic">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="17"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+    </div>
+    <div>
+      <div class="su-brand-t">Orange Health Labs</div>
+      <div class="su-brand-s">KAVACH · SAFETY SYSTEM · DELHI NCR</div>
+    </div>
+    <div class="su-kavach">Kavach</div>
+  </div>
+  <!-- Hero -->
+  <div class="su-hero">
+    <h1>Your safety,<br>always on.</h1>
+    <p>One-tap SOS · Live GPS · 5-step escalation chain</p>
+  </div>
+  <!-- Form (white rounded panel, scrolls internally if needed) -->
+  <div class="su-form">
+    <div class="fg">
+      <label class="su-field-lbl">Your name</label>
+      <input class="su-input" id="s-name" type="text" placeholder="Full name" autocomplete="name">
+    </div>
+    <div class="fg">
+      <label class="su-field-lbl">Your mobile number</label>
+      <div class="su-row">
+        <div class="su-pre">+91</div>
+        <input class="su-input" id="s-phone" type="tel" placeholder="10-digit number" maxlength="10" style="flex:1;" autocomplete="tel-national">
+      </div>
+    </div>
+    <div class="fg">
+      <label class="su-field-lbl">Control tower / ops number</label>
+      <div class="su-row">
+        <div class="su-pre">+91</div>
+        <input class="su-input" id="s-ops" type="tel" placeholder="Primary SOS contact" maxlength="10" style="flex:1;">
+      </div>
+    </div>
+    <div class="su-note">
+      📍 <strong>GPS tip:</strong> Open via a web link (not local file). When browser asks for location, tap <strong>Allow</strong>. GPS works only on https:// — host free on GitHub Pages.
+    </div>
+    <button class="su-btn" onclick="doSetup()">Activate safety profile →</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ HOME ═══ -->
+<div class="screen" id="sc-home">
+  <div class="hdr">
+    <div class="hdr-top">
+      <div class="hdr-logo-ic">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="17"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+      </div>
+      <div class="hdr-logo-nm">Orange Health Labs</div>
+      <div class="hdr-badge"><div class="ldot"></div>On job</div>
+    </div>
+    <div class="hdr-user">
+      <div class="hdr-av" id="h-av">RK</div>
+      <div><div class="hdr-nm" id="h-nm">Raunak</div><div class="hdr-sub" id="h-sub">OHL-DEL · Delhi NCR</div></div>
+    </div>
+    <div class="gps-box">
+      <div class="gps-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></div>
+      <div class="gps-txt"><div class="gps-main" id="g-main">Tap Get GPS to start</div><div class="gps-sub" id="g-sub">GPS not started</div></div>
+      <button class="gps-btn" onclick="getGPS()">Get GPS</button>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="gps-help" id="gps-help">
+      <strong>📍 How to enable GPS:</strong>
+      <ul>
+        <li>Open this app via a link in Chrome or Safari</li>
+        <li>Tap the lock icon → Site settings → Location → Allow</li>
+        <li>Refresh and tap Get GPS again</li>
+        <li>GPS only works on https:// — not on local files</li>
+      </ul>
+    </div>
+    <div class="ci" id="ci-strip">
+      <div class="ci-t">Auto check-in in <strong id="ci-cd">10:00</strong>. Tap to confirm safe.</div>
+      <button class="ci-b" onclick="doCI()">I'm safe</button>
+    </div>
+    <div class="cd" style="margin-bottom:10px;">
+      <div style="font-size:10px;font-weight:700;color:var(--k3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;">Active booking</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:3px;" id="h-pt">Sample collection</div>
+      <div style="font-size:12px;color:var(--k3);line-height:1.4;margin-bottom:8px;" id="h-ad">Safdarjung Enclave, New Delhi</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="pl pl-o" id="h-ar">Just arrived</span>
+        <span class="pl pl-a">ETA 12 min</span>
+      </div>
+    </div>
+    <div class="sos-sec">
+      <div class="sos-wrap">
+        <div class="sos-r1"></div><div class="sos-r2"></div>
+        <button class="sos-btn" onclick="triggerSOS()">SOS<span class="sos-sub">Tap to alert</span></button>
+      </div>
+      <p class="sos-ht">5-step SOP triggered · Live GPS shared</p>
+      <button class="sil-btn" onclick="goto('sc-silent')">
+        <div class="sil-ic"><svg viewBox="0 0 24 24"><path d="M17.94 17.94A10 10 0 0112 20c-5.52 0-10-4.48-10-10 0-2.04.61-3.93 1.64-5.53M6.1 6.1A10 10 0 0122 12c0 1.64-.4 3.18-1.1 4.54M1 1l22 22"/></svg></div>
+        <div style="flex:1;text-align:left;"><div style="font-size:13px;font-weight:700;color:var(--k);">Silent SOS</div><div style="font-size:11px;color:var(--k3);">Alert ops discreetly</div></div>
+        <div class="chv"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </button>
+    </div>
+    <div class="cd" style="margin-top:10px;">
+      <div class="sclbl" style="margin-top:0;">SOP Escalation matrix</div>
+      <div class="em-step"><div class="em-n hi">1</div><div><div class="em-l">Control tower</div><div class="em-s">WhatsApp + call · immediate</div></div></div>
+      <div class="em-ln"></div>
+      <div class="em-step"><div class="em-n">2</div><div><div class="em-l">City logistics team</div><div class="em-s">60 sec callback</div></div></div>
+      <div class="em-ln"></div>
+      <div class="em-step"><div class="em-n">3</div><div><div class="em-l">Team TL</div><div class="em-s">Looped in at 3 min</div></div></div>
+      <div class="em-ln"></div>
+      <div class="em-step"><div class="em-n">4</div><div><div class="em-l">Police (100)</div><div class="em-s">Emergency dispatch</div></div></div>
+      <div class="em-ln"></div>
+      <div class="em-step"><div class="em-n">5</div><div><div class="em-l">Fire / Ambulance (101/102)</div><div class="em-s">Final escalation</div></div></div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="ni on" id="bn-h" onclick="nb('sc-home','bn-h')"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg><span>Home</span></button>
+    <button class="ni" id="bn-m" onclick="nb('sc-medics','bn-m')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span>Medics</span></button>
+    <button class="ni" id="bn-a" onclick="nb('sc-auth','bn-a')"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Auth</span></button>
+    <button class="ni" id="bn-ad" onclick="nb('sc-admin','bn-ad')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Admin</span></button>
+    <button class="ni" id="bn-s" onclick="nb('sc-settings','bn-s')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- ═══ SOS ACTIVE ═══ -->
+<div class="screen" id="sc-sos">
+  <div class="sa-hdr">
+    <div class="sa-pls"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+    <h2>SOS Alert Sent</h2>
+    <p>Control tower notified · GPS shared<br><span id="sos-ts" style="font-size:10px;opacity:.65;"></span></p>
+  </div>
+  <div class="scroll">
+    <div class="loc-ok"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+      <div>GPS: <strong id="sos-loc">Fetching...</strong><br><a id="sos-map" href="#" style="color:var(--b);font-size:11px;font-weight:700;" target="_blank">Open in Google Maps →</a></div>
+    </div>
+    <div class="ag">
+      <a class="at" id="at-ct" href="#"><div class="at-ic b"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 4.18 2 2 0 015 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div><div class="at-l">Call Control</div><div class="at-s">Tower</div></a>
+      <a class="at" id="at-wa" href="#" target="_blank"><div class="at-ic w"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" fill="white"/></svg></div><div class="at-l">WhatsApp</div><div class="at-s">SOS message</div></a>
+      <a class="at" href="tel:100"><div class="at-ic r"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 4.18 2 2 0 015 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div><div class="at-l">Police</div><div class="at-s">100</div></a>
+      <a class="at" id="at-sh" href="#" target="_blank"><div class="at-ic o"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div><div class="at-l">Share GPS</div><div class="at-s">Location link</div></a>
+    </div>
+    <div class="cd" style="margin-bottom:11px;">
+      <div class="sclbl" style="margin-top:0;">SOP Alert timeline</div>
+      <div class="tli"><div class="tll"><div class="tld dn"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="tll-ln"></div></div><div class="tlc"><div class="tlt">Step 1 — Control tower</div><div class="tls">WhatsApp + GPS sent</div><div class="tlts" id="tl1">Now</div></div></div>
+      <div class="tli"><div class="tll"><div class="tld ac"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 4.18 2 2 0 015 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div><div class="tll-ln"></div></div><div class="tlc"><div class="tlt">Step 2 — City logistics</div><div class="tls">Callback in 60 sec</div><div class="tlts">Awaiting...</div></div></div>
+      <div class="tli"><div class="tll"><div class="tld pd"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="tll-ln"></div></div><div class="tlc"><div class="tlt">Step 3 — Team TL</div><div class="tls">At 3 min mark</div><div class="tlts">Pending</div></div></div>
+      <div class="tli"><div class="tll"><div class="tld pd"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="tll-ln"></div></div><div class="tlc"><div class="tlt">Step 4 — Police (100)</div><div class="tls">Emergency dispatch</div><div class="tlts">Pending</div></div></div>
+      <div class="tli"><div class="tll"><div class="tld pd"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div></div><div class="tlc"><div class="tlt">Step 5 — Fire/Ambulance</div><div class="tls">101 / 102</div><div class="tlts">Pending</div></div></div>
+    </div>
+    <div class="br" style="margin-bottom:16px;">
+      <button class="btn btn-gh" style="flex:1;" onclick="goto('sc-home')">← Back</button>
+      <button class="btn btn-g" style="flex:2;" onclick="markSafe()">✓ I'm safe — cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SILENT SOS ═══ -->
+<div class="screen" id="sc-silent">
+  <div class="sl-hdr">
+    <div class="sl-hdr-ic"><svg viewBox="0 0 24 24"><path d="M17.94 17.94A10 10 0 0112 20c-5.52 0-10-4.48-10-10 0-2.04.61-3.93 1.64-5.53M6.1 6.1A10 10 0 0122 12c0 1.64-.4 3.18-1.1 4.54M1 1l22 22"/></svg></div>
+    <h2>Silent SOS</h2><p>Ops alerted. Nothing visible to others.</p>
+  </div>
+  <div class="scroll">
+    <div class="ib2">GPS sent to <strong>control tower silently</strong> via WhatsApp. No sound, no visible alert.</div>
+    <div class="ib2">Ops calls with a <strong>cover reason</strong> — e.g. "confirming sample pickup time".</div>
+    <div class="ib2" style="background:var(--bl);border-color:rgba(21,101,192,.2);">For testing: opens WhatsApp with silent-flag + GPS to ops number.</div>
+    <div class="br">
+      <button class="btn btn-gh" style="flex:1;" onclick="goto('sc-home')">Cancel</button>
+      <button class="btn btn-o" style="flex:2;" onclick="triggerSilent()">Activate silently</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MEDICS ═══ -->
+<div class="screen" id="sc-medics">
+  <div class="tb">
+    <div class="tb-inner">
+      <div class="tb-ic"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+      <div style="flex:1;"><div class="tb-name">Medic roster</div><div class="tb-sub">Delhi NCR</div></div>
+      <div class="ib" onclick="openM('m-med')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="sclbl" id="mc-l">Delhi NCR medics</div>
+    <div id="m-list"></div>
+    <button class="btn btn-o" onclick="openM('m-med')">+ Add medic</button>
+  </div>
+  <div class="nav">
+    <button class="ni" onclick="nb('sc-home','bn-h')"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg><span>Home</span></button>
+    <button class="ni on" id="bn2-m"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span>Medics</span></button>
+    <button class="ni" onclick="nb('sc-auth','bn-a')"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Auth</span></button>
+    <button class="ni" onclick="nb('sc-admin','bn-ad')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Admin</span></button>
+    <button class="ni" onclick="nb('sc-settings','bn-s')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- ═══ AUTHORITIES ═══ -->
+<div class="screen" id="sc-auth">
+  <div class="tb">
+    <div class="tb-inner">
+      <div class="tb-ic"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <div style="flex:1;"><div class="tb-name">Safety authorities</div><div class="tb-sub">Quick-dial contacts</div></div>
+      <div class="ib" onclick="openM('m-auth')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="sclbl">Standard emergency</div>
+    <div id="auth-fix"></div>
+    <div class="sclbl" id="auth-cl">OHL contacts</div>
+    <div id="auth-cust"></div>
+    <button class="btn btn-o" onclick="openM('m-auth')">+ Add custom authority</button>
+  </div>
+  <div class="nav">
+    <button class="ni" onclick="nb('sc-home','bn-h')"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg><span>Home</span></button>
+    <button class="ni" onclick="nb('sc-medics','bn-m')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span>Medics</span></button>
+    <button class="ni on"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Auth</span></button>
+    <button class="ni" onclick="nb('sc-admin','bn-ad')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Admin</span></button>
+    <button class="ni" onclick="nb('sc-settings','bn-s')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- ═══ ADMIN ═══ -->
+<div class="screen" id="sc-admin">
+  <div class="adm-hdr">
+    <div class="adm-inner">
+      <div class="tb-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+      <div style="flex:1;"><div class="tb-name">Admin panel</div><div class="tb-sub">Escalation SOP editor</div></div>
+      <div class="adm-badge">Admin</div>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="sclbl">Live SOP status</div>
+    <div class="st" id="esc-st"></div>
+    <div class="sclbl">Edit escalation contacts</div>
+    <div class="ec"><div class="ec-hd"><div class="ec-n" style="background:#C62828;">1</div><div class="ec-t">Control tower</div><span class="ec-sv" id="sv1">✓ Saved</span></div><div class="ec-bd"><div class="ec-fl"><div class="ec-lbl">Phone</div><div class="fr"><div class="fp">+91</div><input class="fi" id="e1p" type="tel" placeholder="Control tower number" maxlength="10" style="flex:1;"></div></div><div class="ec-fl"><div class="ec-lbl">Name</div><input class="fi" id="e1n" type="text" placeholder="e.g. Delhi Control Tower"></div><button class="btn btn-o" onclick="saveStep(1)">Save step 1</button></div></div>
+    <div class="ec"><div class="ec-hd"><div class="ec-n" style="background:#E65100;">2</div><div class="ec-t">City logistics team</div><span class="ec-sv" id="sv2">✓ Saved</span></div><div class="ec-bd"><div class="ec-fl"><div class="ec-lbl">Phone</div><div class="fr"><div class="fp">+91</div><input class="fi" id="e2p" type="tel" placeholder="City logistics number" maxlength="10" style="flex:1;"></div></div><div class="ec-fl"><div class="ec-lbl">Name</div><input class="fi" id="e2n" type="text" placeholder="e.g. Delhi City Ops Manager"></div><button class="btn btn-o" onclick="saveStep(2)">Save step 2</button></div></div>
+    <div class="ec"><div class="ec-hd"><div class="ec-n" style="background:#1565C0;">3</div><div class="ec-t">Team TL</div><span class="ec-sv" id="sv3">✓ Saved</span></div><div class="ec-bd"><div class="ec-fl"><div class="ec-lbl">Phone</div><div class="fr"><div class="fp">+91</div><input class="fi" id="e3p" type="tel" placeholder="TL number" maxlength="10" style="flex:1;"></div></div><div class="ec-fl"><div class="ec-lbl">Name</div><input class="fi" id="e3n" type="text" placeholder="e.g. Ramesh Kumar (TL)"></div><button class="btn btn-o" onclick="saveStep(3)">Save step 3</button></div></div>
+    <div class="ec"><div class="ec-hd"><div class="ec-n" style="background:#2E7D32;">4</div><div class="ec-t">Police</div><span class="ec-sv" id="sv4">✓ Saved</span></div><div class="ec-bd"><div class="ec-fl"><div class="ec-lbl">Number (default 100)</div><input class="fi" id="e4p" type="tel" placeholder="100"></div><div class="ec-fl"><div class="ec-lbl">Station name</div><input class="fi" id="e4n" type="text" placeholder="e.g. Safdarjung Police Station"></div><button class="btn btn-o" onclick="saveStep(4)">Save step 4</button></div></div>
+    <div class="ec"><div class="ec-hd"><div class="ec-n" style="background:#4527A0;">5</div><div class="ec-t">Fire / Ambulance</div><span class="ec-sv" id="sv5">✓ Saved</span></div><div class="ec-bd"><div class="ec-fl"><div class="ec-lbl">Fire (default 101)</div><input class="fi" id="e5f" type="tel" placeholder="101"></div><div class="ec-fl"><div class="ec-lbl">Ambulance (default 102)</div><input class="fi" id="e5a" type="tel" placeholder="102"></div><div class="ec-fl"><div class="ec-lbl">Hospital name</div><input class="fi" id="e5n" type="text" placeholder="e.g. AIIMS Emergency Delhi"></div><button class="btn btn-o" onclick="saveStep(5)">Save step 5</button></div></div>
+  </div>
+  <div class="nav">
+    <button class="ni" onclick="nb('sc-home','bn-h')"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg><span>Home</span></button>
+    <button class="ni" onclick="nb('sc-medics','bn-m')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span>Medics</span></button>
+    <button class="ni" onclick="nb('sc-auth','bn-a')"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Auth</span></button>
+    <button class="ni on" id="bn3-ad"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Admin</span></button>
+    <button class="ni" onclick="nb('sc-settings','bn-s')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS ═══ -->
+<div class="screen" id="sc-settings">
+  <div class="tb">
+    <div class="tb-inner">
+      <div class="tb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+      <div style="flex:1;"><div class="tb-name">Settings</div><div class="tb-sub">OHL Kavach</div></div>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="sclbl">Your profile</div>
+    <div class="cd" style="margin-bottom:10px;">
+      <div class="fg"><label class="fl">Name</label><input class="fi" id="st-nm" type="text"></div>
+      <div class="fg" style="margin-bottom:12px;"><label class="fl">Mobile number</label><div class="fr"><div class="fp">+91</div><input class="fi" id="st-ph" type="tel" maxlength="10" style="flex:1;"></div></div>
+      <button class="btn btn-o" onclick="saveProfile()">Save profile</button>
+    </div>
+    <div class="sclbl">Check-in timer</div>
+    <div class="cd" style="margin-bottom:10px;">
+      <div style="font-size:12px;color:var(--k3);margin-bottom:10px;">Ops alerted if check-in missed</div>
+      <select class="fs" id="st-ci" style="margin-bottom:11px;"><option value="300">5 minutes</option><option value="600" selected>10 minutes</option><option value="900">15 minutes</option><option value="1200">20 minutes</option></select>
+      <button class="btn btn-o" onclick="saveCITimer()">Save timer</button>
+    </div>
+    <div class="sclbl">About</div>
+    <div class="cd">
+      <div style="font-size:13px;color:var(--k3);line-height:1.9;"><strong style="color:var(--k);font-size:14px;">OHL Kavach v6.0</strong><br>Orange Health Labs · Delhi NCR<br>GPS: Requires https:// to work on phone<br><a href="https://pages.github.com" target="_blank" style="color:var(--o);font-weight:700;">Host free on GitHub Pages →</a></div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="ni" onclick="nb('sc-home','bn-h')"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg><span>Home</span></button>
+    <button class="ni" onclick="nb('sc-medics','bn-m')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span>Medics</span></button>
+    <button class="ni" onclick="nb('sc-auth','bn-a')"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Auth</span></button>
+    <button class="ni" onclick="nb('sc-admin','bn-ad')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Admin</span></button>
+    <button class="ni on" id="bn4-s"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="mb" id="m-med" onclick="bgc(event,'m-med')">
+  <div class="md"><div class="mh"></div><div class="mhd"><div class="mt">Add medic</div><div class="mx" onclick="closeM('m-med')">×</div></div>
+  <div class="fg"><label class="fl">Full name</label><input class="fi" id="am-n" type="text" placeholder="Medic full name" autocomplete="name"></div>
+  <div class="fg"><label class="fl">Mobile number</label><div class="fr"><div class="fp">+91</div><input class="fi" id="am-p" type="tel" placeholder="10-digit" maxlength="10" style="flex:1;"></div></div>
+  <div class="fg"><label class="fl">Zone</label><select class="fs" id="am-z"><option>Delhi South</option><option>Delhi North</option><option>Delhi East</option><option>Delhi West</option><option>Noida</option><option>Gurgaon</option><option>Faridabad</option><option>Ghaziabad</option></select></div>
+  <div class="fg" style="margin-bottom:16px;"><label class="fl">Emergency contact (optional)</label><div class="fr"><div class="fp">+91</div><input class="fi" id="am-e" type="tel" placeholder="Family number" maxlength="10" style="flex:1;"></div></div>
+  <button class="btn btn-o" onclick="addMedic()">Add to roster</button></div>
+</div>
+<div class="mb" id="m-auth" onclick="bgc(event,'m-auth')">
+  <div class="md"><div class="mh"></div><div class="mhd"><div class="mt">Add authority</div><div class="mx" onclick="closeM('m-auth')">×</div></div>
+  <div class="fg"><label class="fl">Name / designation</label><input class="fi" id="aa-n" type="text" placeholder="e.g. Lajpat Nagar Police"></div>
+  <div class="fg"><label class="fl">Phone number</label><input class="fi" id="aa-p" type="tel" placeholder="Any format"></div>
+  <div class="fg" style="margin-bottom:16px;"><label class="fl">Type</label><select class="fs" id="aa-t"><option value="🚔">🚔 Police</option><option value="🚑">🚑 Ambulance</option><option value="👩">👩 Women helpline</option><option value="🏥">🏥 Hospital</option><option value="📋">📋 Ops / internal</option><option value="🔒">🔒 Security</option></select></div>
+  <button class="btn btn-o" onclick="addAuth()">Add authority</button></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const S={name:'Raunak',phone:'8882224066',ini:'RK',lat:null,lng:null,acc:null,ciSecs:600,ciIv:null,gpsW:null,medics:[],auths:[],
+  esc:{1:{p:'',n:'Control tower'},2:{p:'',n:'City logistics'},3:{p:'',n:'Team TL'},4:{p:'100',n:'Police'},5:{f:'101',a:'102',n:'Fire/Ambulance'}}};
+const FIXED=[{n:'Police',d:'100',i:'🚔'},{n:'Ambulance',d:'102',i:'🚑'},{n:'Fire brigade',d:'101',i:'🔥'},{n:'Women helpline',d:'1091',i:'👩'},{n:'National emergency',d:'112',i:'🆘'},{n:'Delhi disaster',d:'1077',i:'🏙️'}];
+const AC=[['#FFEBEE','#C62828'],['#E8F5E9','#2E7D32'],['#E3F2FD','#1565C0'],['#FFF8E1','#E65100'],['#EDE7F6','#4527A0'],['#FCE4EC','#880E4F']];
+function avc(i){return AC[i%AC.length];}
+function ini(n){return(n||'').trim().split(' ').filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'??';}
+function toast(m,d=2800){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+function ts(){return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});}
+function gmap(a,b){return'https://www.google.com/maps?q='+a+','+b;}
+function wa(ph,msg){const c=(ph||'').replace(/\D/g,'');const f=c.startsWith('91')?c:'91'+c;return'https://wa.me/'+f+'?text='+encodeURIComponent(msg);}
+function goto(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function nb(sid,bid){goto(sid);document.querySelectorAll('.ni').forEach(b=>b.classList.remove('on'));const el=document.getElementById(bid);if(el)el.classList.add('on');}
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+function bgc(e,id){if(e.target.id===id)closeM(id);}
+function setGPS(m,s){const gm=document.getElementById('g-main');const gs=document.getElementById('g-sub');if(gm)gm.textContent=m;if(gs)gs.textContent=s;}
+
+function getGPS(){
+  const isLocal=window.location.protocol==='file:';
+  if(isLocal){setGPS('GPS blocked on local file','See instructions below');document.getElementById('gps-help').classList.add('show');toast('GPS needs https:// — see instructions below',4000);return;}
+  if(!navigator.geolocation){setGPS('GPS not supported','');return;}
+  setGPS('Getting location...','Requesting GPS...');
+  document.getElementById('gps-help').classList.remove('show');
+  if(S.gpsW!==null){try{navigator.geolocation.clearWatch(S.gpsW);}catch(e){}}
+  S.gpsW=navigator.geolocation.watchPosition(
+    function(pos){S.lat=pos.coords.latitude.toFixed(6);S.lng=pos.coords.longitude.toFixed(6);S.acc=Math.round(pos.coords.accuracy);setGPS(S.lat+', '+S.lng,'GPS live · ±'+S.acc+'m · '+ts());document.getElementById('gps-help').classList.remove('show');},
+    function(err){if(err.code===1){setGPS('Permission denied','Allow location in browser settings');document.getElementById('gps-help').classList.add('show');}else{S.lat='28.56920';S.lng='77.20660';S.acc=500;setGPS('Delhi NCR (approx)','GPS unavailable — fallback used');}},
+    {enableHighAccuracy:true,timeout:20000,maximumAge:0}
+  );
+}
+
+function startCI(){
+  const s=parseInt((document.getElementById('st-ci')||{value:'600'}).value)||600;S.ciSecs=s;
+  if(S.ciIv)clearInterval(S.ciIv);
+  S.ciIv=setInterval(()=>{S.ciSecs--;const m=Math.floor(S.ciSecs/60),sec=S.ciSecs%60;const el=document.getElementById('ci-cd');if(el)el.textContent=m+':'+(sec<10?'0':'')+sec;if(S.ciSecs<=0){clearInterval(S.ciIv);toast('Missed check-in — ops notified',3500);missedCI();}},1000);
+}
+function doCI(){toast('Check-in confirmed. Stay safe!');startCI();}
+function missedCI(){if(!S.esc[1].p)return;window.open(wa(S.esc[1].p,'OHL KAVACH MISSED CHECK-IN\nMedic: '+S.name+'\n+91 '+S.phone+'\nTime: '+ts()+'\nLocation: '+(S.lat?gmap(S.lat,S.lng):'Delhi NCR')),'_blank');}
+
+function doSetup(){
+  const n=document.getElementById('s-name').value.trim();
+  const p=document.getElementById('s-phone').value.trim();
+  const o=document.getElementById('s-ops').value.trim();
+  if(!n){toast('Enter your name');return;}
+  if(!p||p.length!==10){toast('Enter valid 10-digit number');return;}
+  if(!o||o.length!==10){toast('Enter control tower number');return;}
+  S.name=n;S.phone=p;S.ini=ini(n);S.esc[1].p=o;
+  syncUI();renderMedics();renderAuth();renderAdmin();
+  goto('sc-home');getGPS();startCI();
+  document.getElementById('h-ar').textContent='Arrived '+ts();
+}
+
+function buildMsg(sil){
+  const lat=S.lat||'28.56920',lng=S.lng||'77.20660';
+  const ac=S.acc?' (±'+S.acc+'m)':'';const e=S.esc;
+  return(sil?'SILENT SOS':'SOS ALERT')+' — OHL KAVACH\n\nMedic: '+S.name+'\nPhone: +91 '+S.phone+'\nCity: Delhi NCR\nTime: '+ts()+'\nGPS'+ac+': '+gmap(lat,lng)+'\n\n'+(sil?'SILENT — use cover reason.\n\n':'IMMEDIATE RESPONSE NEEDED\n\n')+'SOP:\n1. Control tower: '+(e[1].p||'set in admin')+'\n2. City logistics: '+(e[2].p||'—')+'\n3. Team TL: '+(e[3].p||'—')+'\n4. Police: '+(e[4].p||'100')+'\n5. Fire: '+(e[5].f||'101')+' / Amb: '+(e[5].a||'102')+'\n\n— OHL Kavach';}
+
+function triggerSOS(){
+  getGPS();
+  setTimeout(()=>{
+    const lat=S.lat||'28.56920',lng=S.lng||'77.20660';
+    const mu=gmap(lat,lng);const ld=S.lat?(lat+', '+lng+(S.acc?' ±'+S.acc+'m':'')):'Delhi NCR (approx)';const tn=ts();
+    document.getElementById('sos-ts').textContent='Alert at '+tn;
+    document.getElementById('tl1').textContent=tn;
+    document.getElementById('sos-loc').textContent=ld;
+    document.getElementById('sos-map').href=mu;
+    document.getElementById('at-sh').href=mu;
+    const op=S.esc[1].p;
+    document.getElementById('at-ct').href=op?'tel:+91'+op:'tel:100';
+    document.getElementById('at-wa').href=op?wa(op,buildMsg(false)):'#';
+    goto('sc-sos');
+    if(op)setTimeout(()=>window.open(wa(op,buildMsg(false)),'_blank'),500);
+    if(S.esc[2].p)setTimeout(()=>window.open(wa(S.esc[2].p,buildMsg(false)),'_blank'),1400);
+    if(S.esc[3].p)setTimeout(()=>window.open(wa(S.esc[3].p,buildMsg(false)),'_blank'),2300);
+  },800);
+}
+function triggerSilent(){const op=S.esc[1].p;if(op)window.open(wa(op,buildMsg(true)),'_blank');goto('sc-home');toast('Silent SOS sent. Stay calm.');}
+function markSafe(){goto('sc-home');toast('Alert cancelled. Glad you are safe!');}
+
+function addMedic(){
+  const n=document.getElementById('am-n').value.trim();const p=document.getElementById('am-p').value.trim();
+  const z=document.getElementById('am-z').value;const ec=document.getElementById('am-e').value.trim();
+  if(!n){toast('Name required');return;}if(!p||p.length!==10){toast('Valid 10-digit number required');return;}
+  S.medics.push({name:n,phone:p,zone:z,ec:ec});
+  document.getElementById('am-n').value='';document.getElementById('am-p').value='';document.getElementById('am-e').value='';
+  closeM('m-med');renderMedics();toast(n+' added to roster');
+}
+function delMedic(i){const n=S.medics[i].name;S.medics.splice(i,1);renderMedics();toast(n+' removed');}
+function renderMedics(){
+  const all=[{name:S.name,phone:S.phone,zone:'Delhi',self:true},...S.medics];
+  document.getElementById('mc-l').textContent='Delhi NCR · '+all.length+' medic'+(all.length!==1?'s':'');
+  document.getElementById('m-list').innerHTML=all.map((m,i)=>{
+    const [bg,tc]=avc(i);const sf=m.self?'<span class="pl pl-b" style="font-size:9px;margin-left:5px;">You</span>':'';
+    const dl=m.self?'':`<button class="bx bx-d" onclick="delMedic(${i-1})">Remove</button>`;
+    const ec=m.ec?`<a class="bx" href="tel:+91${m.ec}" style="background:#4527A0;color:#fff;">EC</a>`:'';
+    return'<div class="mc"><div class="mc-top"><div class="mc-av" style="background:'+bg+';color:'+tc+';">'+ini(m.name)+'</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">'+m.name+sf+'</div><div style="font-size:11px;color:var(--k3);">+91 '+m.phone+' · '+m.zone+'</div></div><span class="pl pl-g">Active</span></div><div style="display:flex;gap:7px;flex-wrap:wrap;"><a class="bx bx-c" href="tel:+91'+m.phone+'">📞 Call</a><a class="bx bx-w" href="'+wa(m.phone,'OHL Kavach check-in.')+'" target="_blank">WhatsApp</a>'+ec+dl+'</div></div>';
+  }).join('');
+}
+
+function addAuth(){
+  const n=document.getElementById('aa-n').value.trim();const p=document.getElementById('aa-p').value.trim();const ic=document.getElementById('aa-t').value;
+  if(!n||!p){toast('Name and number required');return;}
+  S.auths.push({name:n,phone:p,icon:ic});
+  document.getElementById('aa-n').value='';document.getElementById('aa-p').value='';
+  closeM('m-auth');renderAuth();toast(n+' added');
+}
+function delAuth(i){const n=S.auths[i].name;S.auths.splice(i,1);renderAuth();toast(n+' removed');}
+function authCard(a,i,del){
+  const num=a.d||a.phone;
+  const wb=num&&num.length>4?'<a class="acb w" href="'+wa(num,'OHL SOS emergency')+'" target="_blank"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" fill="white"/></svg></a>':'';
+  const db=del?'<button class="acb d" onclick="delAuth('+i+')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>':'';
+  return'<div class="ac"><div class="ac-em">'+a.i+'</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+a.n+'</div><div style="font-size:11px;color:var(--k3);">'+num+'</div></div><div class="ac-acts"><a class="acb c" href="tel:'+num+'"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 4.18 2 2 0 015 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></a>'+wb+db+'</div></div>';
+}
+function renderAuth(){
+  document.getElementById('auth-fix').innerHTML=FIXED.map((a,i)=>authCard(a,i,false)).join('');
+  document.getElementById('auth-cust').innerHTML=S.auths.map((a,i)=>authCard({i:a.icon,n:a.name,d:a.phone},i,true)).join('');
+  document.getElementById('auth-cl').textContent=S.auths.length?'OHL contacts ('+S.auths.length+')':'OHL contacts';
+}
+
+function saveStep(n){
+  const e=S.esc[n];
+  if(n<5){e.p=(document.getElementById('e'+n+'p').value||'').trim();e.n=(document.getElementById('e'+n+'n').value||'').trim()||e.n;}
+  else{e.f=(document.getElementById('e5f').value||'101').trim();e.a=(document.getElementById('e5a').value||'102').trim();e.n=(document.getElementById('e5n').value||e.n).trim();}
+  const sv=document.getElementById('sv'+n);if(sv){sv.style.display='inline';setTimeout(()=>sv.style.display='none',2500);}
+  renderAdmin();toast('Step '+n+' saved');
+}
+function renderAdmin(){
+  for(let i=1;i<=4;i++){const pe=document.getElementById('e'+i+'p');const ne=document.getElementById('e'+i+'n');if(pe)pe.value=S.esc[i].p||'';if(ne)ne.value=S.esc[i].n||'';}
+  const ef=document.getElementById('e5f');const ea=document.getElementById('e5a');const en=document.getElementById('e5n');
+  if(ef)ef.value=S.esc[5].f||'';if(ea)ea.value=S.esc[5].a||'';if(en)en.value=S.esc[5].n||'';
+  const rows=[{n:1,l:'Control tower',v:S.esc[1].p,c:'#C62828'},{n:2,l:'City logistics',v:S.esc[2].p,c:'#E65100'},{n:3,l:'Team TL',v:S.esc[3].p,c:'#1565C0'},{n:4,l:'Police',v:S.esc[4].p||'100',c:'#2E7D32'},{n:5,l:'Fire/Ambulance',v:(S.esc[5].f||'101')+'/'+(S.esc[5].a||'102'),c:'#4527A0'}];
+  document.getElementById('esc-st').innerHTML=rows.map(r=>'<div class="st-row"><div class="st-n" style="background:'+r.c+';">'+r.n+'</div><div style="flex:1;"><div class="st-nm">'+r.l+'</div><div class="st-ph">'+(r.v||'Not set')+'</div></div><span class="st-st '+(r.v?'ok':'no')+'">'+(r.v?'✓ Set':'Not set')+'</span></div>').join('');
+}
+
+function saveProfile(){const n=(document.getElementById('st-nm').value||'').trim();const p=(document.getElementById('st-ph').value||'').trim();if(!n||!p){toast('Both fields required');return;}S.name=n;S.phone=p;S.ini=ini(n);document.getElementById('h-nm').textContent=n;document.getElementById('h-av').textContent=ini(n);renderMedics();toast('Profile saved');}
+function saveCITimer(){S.ciSecs=parseInt(document.getElementById('st-ci').value)||600;startCI();toast('Timer updated');}
+function syncUI(){document.getElementById('h-nm').textContent=S.name;document.getElementById('h-av').textContent=S.ini;document.getElementById('h-sub').textContent='OHL-DEL · +91 '+S.phone;document.getElementById('st-nm').value=S.name;document.getElementById('st-ph').value=S.phone;renderAdmin();}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('s-name').value='Raunak';
+  document.getElementById('s-phone').value='8882224066';
+  renderAuth();renderMedics();renderAdmin();
+});
+</script>
+</body>
+</html>
